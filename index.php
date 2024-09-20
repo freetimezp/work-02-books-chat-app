@@ -18,7 +18,7 @@
    <link rel="stylesheet" href="assets/css/styles.css">
 
    <!--=============== chat app CSS ===============-->
-   <link rel="stylesheet" href="assets/css/chat-app.css">
+   <link rel="stylesheet" href="assets/css/chat-app.scss">
 
    <title>Books</title>
 </head>
@@ -1010,12 +1010,22 @@
 
             <input type="hidden" id="chat-answerTo" name="answer_to" value="" />
 
-            <label for="topic" id="chat-select-label">Тема:</label>
-            <select id="chat_topic" name="topic" required>
-               <option value="Мене цікавить питання 1" selected>Мене цікавить питання 1</option>
-               <option value="Мене цікавить питання 2">Мене цікавить питання 2</option>
-               <option value="Мене цікавить питання 3">Мене цікавить питання 3</option>
-            </select>
+            <label for="chat-topic" id="chat-select-label">Тема (зі списку):</label>
+            <div class="__select" data-state="" id="chat-topic">
+               <div class="__select__title" data-default="Option 0">Topic 1</div>
+               <div class="__select__content">
+                  <input id="singleSelect0" class="__select__input" type="radio" name="singleSelect" />
+                  <label for="singleSelect0" class="__select__label">Topic 0</label>
+                  <input id="singleSelect1" class="__select__input" type="radio" name="singleSelect" />
+                  <label for="singleSelect1" class="__select__label">Topic 1</label>
+                  <input id="singleSelect2" class="__select__input" type="radio" name="singleSelect" />
+                  <label for="singleSelect2" class="__select__label">Topic 2</label>
+                  <input id="singleSelect3" class="__select__input" type="radio" name="singleSelect" />
+                  <label for="singleSelect3" class="__select__label">Topic 3</label>
+                  <input id="singleSelect4" class="__select__input" type="radio" name="singleSelect" />
+                  <label for="singleSelect4" class="__select__label">Topic 4</label>
+               </div>
+            </div>
 
             <textarea id="message" name="message" rows="4" cols="50" placeholder="Наберіть текст повідомлення"
                required></textarea>
