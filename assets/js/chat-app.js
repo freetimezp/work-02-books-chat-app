@@ -1,13 +1,37 @@
 window.addEventListener("DOMContentLoaded", () => {
-    const toggleChatAppBtn = document.querySelector(".chat-icon");
+    //toggle chat
+    const toggleChat = document.getElementById("chat-icon-toggle");
+    const closeChat = document.getElementById("close-chat-btn");
+    const formBlock = document.querySelector(".chat-form-block");
+    const formContent = document.getElementById("chat-message-list");
 
-    if (toggleChatAppBtn) {
-        toggleChatAppBtn.addEventListener("click", () => {
-            if (toggleChatAppBtn.classList.contains("is-clicked")) {
-                toggleChatAppBtn.classList.remove("is-clicked");
+    if (toggleChat) {
+        toggleChat.addEventListener("click", () => {
+            if (toggleChat.classList.contains("is-clicked")) {
+                toggleChat.classList.remove("is-clicked");
             } else {
-                toggleChatAppBtn.classList.add("is-clicked");
+                toggleChat.classList.add("is-clicked");
             }
+
+            if (formBlock.classList.contains("active")) {
+                // if (formContent.classList.contains("active")) {
+                //     formContent.classList.remove("active");
+                //     formContent.classList.add("check");
+                // }
+                formBlock.classList.remove("active");
+            } else {
+                //formContent.classList.remove("check");
+                formBlock.classList.add("active");
+            }
+        });
+    }
+
+    if (closeChat) {
+        closeChat.addEventListener("click", () => {
+            formBlock.classList.remove("active");
+            // if (formContent.classList.contains("active")) {
+            //     formContent.classList.remove("active");
+            // }
         });
     }
 

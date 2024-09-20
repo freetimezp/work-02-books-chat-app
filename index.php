@@ -903,27 +903,149 @@
       <i class="ri-arrow-up-line"></i>
    </a>
 
+   <!--========== TOGGLE CHAT BTN ==========-->
    <div class="chat-icon" id="chat-icon-toggle">
       <box-icon name='chat'></box-icon>
    </div>
 
-   <!--=============== ajax ===============-->
-   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+   <!--========== CHAT FORM ==========-->
+   <div class="chat-form-block" id="chat-form-block">
+      <div class="chat-form-wrapper">
+         <div class="chat-form-content active" id="chat-message-list">
+            <div class="chat-message-block" onclick="console.log(123)">
+               <div class="chat-message-block__header">
+                  <div class="chat-message-block__header-left">
+                     <div class="chat-message-avatar">
+                        П
+                     </div>
+                     <div class="chat-message-name">
+                        Петро
+                     </div>
+                  </div>
+                  <div class="chat-message-block__header-right">
+                     <div class="chat-message-topic">
+                        Topic 1
+                     </div>
+                     <div class="chat-message-date">
+                        12.09.2024 17:23:00
+                     </div>
+                  </div>
+               </div>
 
-   <!--=============== SCROLLREVEAL ===============-->
-   <script src="./assets/js/scrollreveal.min.js"></script>
+               <div class="chat-message-block__content">
+                  <p>
+                     Lorem ipsum dolor sit amet consectetur, adipisicing elit. Velit
+                     aut sit fugiat voluptatum, praesentium dolores ratione nam,
+                     doloremque fugit autem fuga aliquam saepe, nihil sequi atque id
+                     nulla. In explicabo itaque numquam!
+                  </p>
+               </div>
+            </div>
 
-   <!--=============== SWIPER JS ===============-->
-   <script src="./assets/js/swiper-bundle.min.js"></script>
+            <div class="chat-message-block chat-message-manager" onclick="console.log(123)">
+               <div class="chat-message-block__header">
+                  <div class="chat-message-block__header-left">
+                     <div class="chat-message-avatar">
+                        M
+                     </div>
+                     <div class="chat-message-name">
+                        Manager 1
+                     </div>
+                  </div>
+                  <div class="chat-message-block__header-right">
+                     <div class="chat-message-topic">
+                        Topic 1
+                     </div>
+                     <div class="chat-message-date">
+                        12.09.2024 17:24:00
+                     </div>
+                  </div>
+               </div>
 
-   <!--=============== box icons ===============-->
-   <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+               <div class="chat-message-block__content">
+                  <p>
+                     Lorem ipsum dolor sit amet consectetur, adipisicing elit. Velit
+                     aut sit fugiat voluptatum, praesentium dolores ratione nam,
+                     doloremque fugit autem fuga aliquam saepe, nihil sequi atque id
+                     nulla. In explicabo itaque numquam!
+                  </p>
+               </div>
+            </div>
 
-   <!--=============== MAIN JS ===============-->
-   <script src="./assets/js/main.js"></script>
+            <div class="chat-message-block chat-message-admin" onclick="console.log(123)">
+               <div class="chat-message-block__header">
+                  <div class="chat-message-block__header-left">
+                     <div class="chat-message-avatar">
+                        A
+                     </div>
+                     <div class="chat-message-name">
+                        Admin
+                     </div>
+                  </div>
+                  <div class="chat-message-block__header-right">
+                     <div class="chat-message-topic">
+                        Topic 1
+                     </div>
+                     <div class="chat-message-date">
+                        12.09.2024 17:27:00
+                     </div>
+                  </div>
+               </div>
 
-   <!--=============== chat app JS ===============-->
-   <script src="./assets/js/chat-app.js"></script>
+               <div class="chat-message-block__content">
+                  <p>
+                     Lorem ipsum dolor sit amet consectetur, adipisicing elit. Velit
+                     aut sit fugiat voluptatum, praesentium dolores ratione nam,
+                     doloremque fugit autem fuga aliquam saepe, nihil sequi atque id
+                     nulla. In explicabo itaque numquam!
+                  </p>
+               </div>
+            </div>
+         </div>
+
+         <form id="chatForm">
+            <input type="hidden" id="chat-hidden_user_id" name="hidden_user_id"
+               value="<?= isset($_SESSION['user_id']) ? $_SESSION['user_id'] : ''; ?>" />
+            <input type="hidden" id="chat-token" name="token" value="">
+
+            <input type="hidden" id="chat-answerTo" name="answer_to" value="" />
+
+            <label for="topic" id="chat-select-label">Тема:</label>
+            <select id="chat_topic" name="topic" required>
+               <option value="Мене цікавить питання 1" selected>Мене цікавить питання 1</option>
+               <option value="Мене цікавить питання 2">Мене цікавить питання 2</option>
+               <option value="Мене цікавить питання 3">Мене цікавить питання 3</option>
+            </select>
+
+            <textarea id="message" name="message" rows="4" cols="50" placeholder="Наберіть текст повідомлення"
+               required></textarea>
+
+            <div class="chat-btn-block">
+               <div class="chat-btn chat-form-close-btn" id="close-chat-btn">
+                  Закрити
+               </div>
+               <button class="chat-btn" type="submit" <?= !isset($_SESSION['user_email']) && 'disabled'; ?>>Відправити</button>
+            </div>
+         </form>
+      </div>
+
+      <!--=============== ajax ===============-->
+      <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+      <!--=============== SCROLLREVEAL ===============-->
+      <script src="./assets/js/scrollreveal.min.js"></script>
+
+      <!--=============== SWIPER JS ===============-->
+      <script src="./assets/js/swiper-bundle.min.js"></script>
+
+      <!--=============== box icons ===============-->
+      <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+
+      <!--=============== MAIN JS ===============-->
+      <script src="./assets/js/main.js"></script>
+
+      <!--=============== chat app JS ===============-->
+      <script src="./assets/js/chat-app.js"></script>
 </body>
 
 </html>
