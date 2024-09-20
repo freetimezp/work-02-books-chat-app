@@ -14,8 +14,11 @@
    <!--=============== SWIPER CSS ===============-->
    <link rel="stylesheet" href="./assets/css/swiper-bundle.min.css">
 
-   <!--=============== CSS ===============-->
+   <!--=============== main CSS ===============-->
    <link rel="stylesheet" href="assets/css/styles.css">
+
+   <!--=============== chat app CSS ===============-->
+   <link rel="stylesheet" href="assets/css/chat-app.css">
 
    <title>Books</title>
 </head>
@@ -900,14 +903,27 @@
       <i class="ri-arrow-up-line"></i>
    </a>
 
+   <div class="chat-icon" id="chat-icon-toggle">
+      <box-icon name='chat'></box-icon>
+   </div>
+
+   <!--=============== ajax ===============-->
+   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
    <!--=============== SCROLLREVEAL ===============-->
    <script src="./assets/js/scrollreveal.min.js"></script>
 
    <!--=============== SWIPER JS ===============-->
    <script src="./assets/js/swiper-bundle.min.js"></script>
 
+   <!--=============== box icons ===============-->
+   <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+
    <!--=============== MAIN JS ===============-->
    <script src="./assets/js/main.js"></script>
+
+   <!--=============== chat app JS ===============-->
+   <script src="./assets/js/chat-app.js"></script>
 </body>
 
 </html>
