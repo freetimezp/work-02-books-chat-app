@@ -280,24 +280,37 @@
 }
 
 /** select end **/
+.chat-manager-user {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  font-size: 28px;
+}
 
+.chat-manager-user b {
+  text-transform: capitalize;
+}
 
+.chat-manager-user .chat-btn.logout {
+  padding: 10px 30px;
+  background-color: rgb(33, 89, 211);
+  color: #fff;
+  font-size: 18px;
+  text-align: center;
+  border-radius: 20px;
+  cursor: pointer;
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+.chat-login-btn {
+  text-transform: capitalize;
+  cursor: pointer;
+  padding: 4px 10px;
+  border: 1px solid #9fbaeb;
+  border-radius: 15px;
+  background-color: #9fbaeb;
+  color: #fff;
+}
 
 ::-webkit-scrollbar {
   width: 0.4rem;
@@ -351,7 +364,6 @@
 #chatForm .chat-btn.chat-form-close-btn:hover {
   background-color: #979ada;
 }
-
 
 
 /* message */

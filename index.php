@@ -79,7 +79,15 @@ require("functions.php");
 
          <div class="nav__actions">
             <i class="ri-search-line search-button" id="search-button"></i>
-            <i class="ri-user-line login-button" id="login-button"></i>
+
+            <?php if (!isset($_SESSION['chat-login-name'])): ?>
+               <i class="ri-user-line login-button" id="login-button"></i>
+            <?php else: ?>
+               <button class="login-button chat-login-btn" id="login-button">
+                  <?php echo $_SESSION['chat-login-name']; ?>
+               </button>
+            <?php endif; ?>
+
             <i class="ri-moon-line change-theme" id="theme-button"></i>
          </div>
       </nav>
