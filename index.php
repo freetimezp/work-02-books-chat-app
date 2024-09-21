@@ -33,6 +33,121 @@ require("functions.php");
    <link rel="stylesheet" href="assets/css/chat-app.scss">
 
    <title>Books</title>
+
+   <script>
+      let currentMessageCount = 0; // Store the current count of messages
+      let activeMessageToken = null; // Variable to store the token of the active message
+
+      // Poll for message count every 5 seconds
+      setInterval(function() {
+         checkMessageCount();
+
+         reapplyActiveMessage();
+      }, 5000); // Poll every 5 seconds
+      setInterval(function() {
+         $.ajax({
+            url: 'get_new_messages.php',
+            method: 'GET',
+            success: function(response) {
+               // Update message list
+               $('#messageList').html(response);
+
+               // Reapply active message after the update
+               reapplyActiveMessage();
+            }
+         });
+      }, 5000);
+
+
+      // Function to check the count of messages from the server
+      function checkMessageCount() {
+         var xhr = new XMLHttpRequest();
+         xhr.open("GET", "get_message_count.php", true); // Server endpoint to get the message count
+         xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+               const newMessageCount = parseInt(xhr.responseText);
+               if (newMessageCount !== currentMessageCount) { // Only fetch messages if the count changes
+                  currentMessageCount = newMessageCount;
+
+                  check = document.getElementById("chat-message-list").classList.contains("check");
+
+                  if (!check) {
+                     document.getElementById("chat-message-list").classList.add("active");
+                  }
+
+                  fetchNewMessages(); // Fetch new messages
+               }
+            }
+         };
+         xhr.send();
+      }
+
+      // Function to fetch new messages from the server
+      function fetchNewMessages() {
+         var xhr = new XMLHttpRequest();
+         xhr.open("GET", "get_new_messages.php", true); // Server endpoint to get new messages
+         xhr.onreadystatechange = function() {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+               document.getElementById("chat-message-list").innerHTML = xhr.responseText; // Update the messages list
+
+               // After updating the message list, reapply the 'message-active' class
+               reapplyActiveMessage();
+
+               scrollToBottom(); // Optional: Scroll to the bottom
+            }
+         };
+         xhr.send();
+      }
+
+      // Function to scroll to the bottom of the message list
+      function scrollToBottom() {
+         var messageList = document.getElementById('chat-message-list');
+         messageList.scrollTop = messageList.scrollHeight; // Scroll to the bottom
+      }
+
+
+
+      function replyToMessage(token) {
+         // Remove 'message-active' from all messages
+         document.querySelectorAll('.chat-message-block').forEach(function(messageBlock) {
+            messageBlock.classList.remove('message-active');
+         });
+
+         // Add 'message-active' class to the clicked message
+         let clickedMessage = document.querySelector(`[data-token='${token}']`);
+         if (clickedMessage) {
+            clickedMessage.classList.add('message-active');
+         }
+
+         // Store the selected message's token
+         activeMessageToken = token;
+
+         // Optionally store in localStorage to persist across page reloads
+         localStorage.setItem('activeMessageToken', token);
+
+         document.getElementById('chat-answerTo').value = token;
+      }
+
+      // Function to reapply 'message-active' class after refresh
+      function reapplyActiveMessage() {
+         const storedToken = localStorage.getItem('activeMessageToken');
+         if (storedToken) {
+            let activeMessage = document.querySelector(`[data-token='${storedToken}']`);
+            if (activeMessage) {
+               activeMessage.classList.add('message-active');
+            }
+         }
+      }
+
+      function clearAnswerToken() {
+         activeMessageToken = null;
+         document.getElementById('chat-answerTo').value = "";
+         localStorage.removeItem('activeMessageToken');
+         document.querySelectorAll('.chat-message-block').forEach(function(messageBlock) {
+            messageBlock.classList.remove('message-active');
+         });
+      }
+   </script>
 </head>
 
 <body>
@@ -940,8 +1055,8 @@ require("functions.php");
    <!--========== CHAT FORM ==========-->
    <div class="chat-form-block" id="chat-form-block">
       <div class="chat-form-wrapper">
-         <div class="chat-form-content active" id="chat-message-list">
-            <div class="chat-message-block" onclick="console.log(123)">
+         <div class="chat-form-content" id="chat-message-list">
+            <!-- <div class="chat-message-block">
                <div class="chat-message-block__header">
                   <div class="chat-message-block__header-left">
                      <div class="chat-message-avatar">
@@ -971,7 +1086,7 @@ require("functions.php");
                </div>
             </div>
 
-            <div class="chat-message-block chat-message-manager" onclick="console.log(123)">
+            <div class="chat-message-block chat-message-manager">
                <div class="chat-message-block__header">
                   <div class="chat-message-block__header-left">
                      <div class="chat-message-avatar">
@@ -1001,7 +1116,7 @@ require("functions.php");
                </div>
             </div>
 
-            <div class="chat-message-block chat-message-admin" onclick="console.log(123)">
+            <div class="chat-message-block chat-message-admin">
                <div class="chat-message-block__header">
                   <div class="chat-message-block__header-left">
                      <div class="chat-message-avatar">
@@ -1029,15 +1144,17 @@ require("functions.php");
                      nulla. In explicabo itaque numquam!
                   </p>
                </div>
-            </div>
+            </div> -->
          </div>
 
          <form id="chatForm" method="POST">
             <input type="hidden" id="chat-hidden_user_id" name="hidden_user_id"
                value="<?= isset($_SESSION['user_id']) ? $_SESSION['user_id'] : ''; ?>" />
-            <input type="hidden" id="chat-token" name="token" value="">
 
-            <input type="hidden" id="chat-answerTo" name="answer_to" value="" />
+            <input type="hidden" id="chat-message-token" name="chat-message-token" value="">
+            <input type="hidden" id="chat-session-token" name="chat-session-token" value="">
+
+            <input type="hidden" id="chat-answerTo" name="chat-answer_to" value="" />
 
             <?php
             if (isset($_SESSION['chat-login-name'])) {
