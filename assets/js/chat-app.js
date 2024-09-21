@@ -7,21 +7,26 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (toggleChat) {
         toggleChat.addEventListener("click", () => {
-            if (toggleChat.classList.contains("is-clicked")) {
-                toggleChat.classList.remove("is-clicked");
-            } else {
-                toggleChat.classList.add("is-clicked");
-            }
-
             if (formBlock.classList.contains("active")) {
                 // if (formContent.classList.contains("active")) {
                 //     formContent.classList.remove("active");
                 //     formContent.classList.add("check");
                 // }
                 formBlock.classList.remove("active");
+
+                if (toggleChat.classList.contains("is-clicked")) {
+                    toggleChat.classList.remove("is-clicked");
+                } else {
+                    toggleChat.classList.add("is-clicked");
+                }
             } else {
                 //formContent.classList.remove("check");
                 formBlock.classList.add("active");
+                if (toggleChat.classList.contains("is-clicked")) {
+                    toggleChat.classList.remove("is-clicked");
+                } else {
+                    toggleChat.classList.add("is-clicked");
+                }
             }
         });
     }
@@ -29,6 +34,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (closeChat) {
         closeChat.addEventListener("click", () => {
             formBlock.classList.remove("active");
+            toggleChat.classList.remove("is-clicked");
             // if (formContent.classList.contains("active")) {
             //     formContent.classList.remove("active");
             // }

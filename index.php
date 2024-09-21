@@ -1,3 +1,15 @@
+<?php
+session_start(); // starts the session
+//save main page in session
+$_SESSION['url'] = $_SERVER['REQUEST_URI'];
+
+//connect to database SQL
+require("connectDB.php");
+
+//functions
+require("functions.php");
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -84,28 +96,37 @@
 
    <!--==================== LOGIN ====================-->
    <div class="login grid" id="login-content">
-      <form class="login__form grid">
-         <h3 class="login__title">Log In</h3>
-         <div class="login__group grid">
-            <div>
-               <label for="login-email" class="login__label">Email</label>
-               <input type="email" class="login__input" placeholder="Write your email" id="login-email">
+      <?php if (!isset($_SESSION['chat-login-email'])): ?>
+         <form class="login__form grid" method="POST" action="login.php">
+            <h3 class="login__title">Log In</h3>
+            <div class="login__group grid">
+               <div>
+                  <label for="login-email" class="login__label">Email</label>
+                  <input type="email" class="login__input" placeholder="Write your email"
+                     name="chat-login-email" id="chat-login-email" required>
+               </div>
+               <div>
+                  <label for="login-pass" class="login__label">Password</label>
+                  <input type="password" class="login__input" placeholder="Enter your password"
+                     name="chat-login-pass" id="chat-login-pass" required>
+               </div>
             </div>
             <div>
-               <label for="login-pass" class="login__label">Password</label>
-               <input type="password" class="login__input" placeholder="Enter your password" id="login-pass">
+               <span class="login__signup">
+                  You do not have an account? <a href="#">Sign Up</a>
+               </span>
+               <a href="#" class="login__forgot">
+                  You forgot your password
+               </a>
+               <button type="submit" class="login__button button">Login</button>
             </div>
-         </div>
-         <div>
-            <span class="login__signup">
-               You do not have an account? <a href="#">Sign Up</a>
-            </span>
-            <a href="#" class="login__forgot">
-               You forgot your password
-            </a>
-            <button type="submit" class="login__button button">Log In</button>
-         </div>
-      </form>
+         </form>
+      <?php else: ?>
+         <form class="chat-manager-user" method="POST" action="logout.php">
+            <span>Hello - <b><?php echo $_SESSION['chat-login-name']; ?></b></span>
+            <button type="submit" class="chat-btn logout">logout</button>
+         </form>
+      <?php endif ?>
 
       <i class="ri-close-line login__close" id="login-close"></i>
    </div>
@@ -1009,6 +1030,8 @@
             <input type="hidden" id="chat-token" name="token" value="">
 
             <input type="hidden" id="chat-answerTo" name="answer_to" value="" />
+
+
 
             <label for="chat-topic" id="chat-select-label">Тема (зі списку):</label>
             <div class="__select" data-state="" id="chat-topic">
