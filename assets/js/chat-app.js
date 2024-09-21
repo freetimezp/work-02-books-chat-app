@@ -72,16 +72,56 @@ window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("chatForm").addEventListener("submit", function (event) {
         event.preventDefault(); // Prevent form submission
 
-        const user_id = document.getElementById("chat-hidden_user_id").value || "";
+        const user_id = document.getElementById("chat-hidden_user_id").value;
+        const user_name = document.getElementById("chat-message-user-name").value || "User";
         const messageTopic = document.querySelector('.__select__title').innerText;
-        //console.log(messageTopic);
+        //console.log(user_id);
         const messageText = document.getElementById("chat-message").value;
-        const messageToken = "message123"; // Token generation function
-        const sessionToken = "session456"; // Token generation function
+        const messageToken = generateToken(30); // Token generation function
+
+
+        // Function to set a session token with expiration time
+        function setSessionToken(token, expirationTime) {
+            const now = new Date().getTime(); // Get current time in milliseconds
+            const item = {
+                value: token,
+                expiry: now + expirationTime
+            };
+            localStorage.setItem("chat-session-token", JSON.stringify(item));
+        }
+
+        // Function to get session token and check if it’s expired
+        function getSessionToken() {
+            const itemStr = localStorage.getItem("chat-session-token");
+
+            // If the item doesn't exist, return null
+            if (!itemStr) {
+                return null;
+            }
+
+            const item = JSON.parse(itemStr);
+            const now = new Date().getTime();
+
+            // Compare the expiry time with the current time
+            if (now > item.expiry) {
+                // If expired, remove token and return null
+                localStorage.removeItem("chat-session-token");
+                return null;
+            }
+            return item.value;
+        }
+
+        // Set the session token if it doesn't exist or has expired
+        const sessionToken = getSessionToken();
+        if (!sessionToken) {
+            const newSessionToken = generateToken(20);
+            setSessionToken(newSessionToken, 259200000); // Set expiration to 3 days 
+        }
+
         const answer_to = document.getElementById("chat-answerTo").value || null;
 
         const data = {
-            user_name: "evgen",
+            user_name: user_name,
             user_id: user_id,
             message_topic: messageTopic,
             message_text: messageText,
@@ -103,7 +143,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 //alert("Message sent successfully!");
 
                 //clear form
-                //document.getElementById("message").value = '';
+                document.getElementById("chat-message").value = '';
             }
         };
 
@@ -113,7 +153,18 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 
-
+    // Generate a simple token for user identification
+    function generateToken(tokenLength) {
+        let result = '';
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_*@#$%^&';
+        const charactersLength = characters.length;
+        let counter = 0;
+        while (counter < tokenLength) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+            counter += 1;
+        }
+        return result;
+    }
 
 
 

@@ -10,16 +10,17 @@ $data = json_decode(file_get_contents("php://input"), true);
 $role = isset($_SESSION['role']) ? $_SESSION['role'] : "user";
 
 if ($data) {
-    print_r($data);
+    //print_r($data);
     // Default values from the data
     $user_name = $data['user_name'];
-    $user_id = $data['user_id'] || null;
+    $user_id = $data['user_id'] ?? null;
     $message_topic = $data['message_topic'];
     $message_text = $data['message_text'];
     $message_token = $data['message_token'];
     $session_token = $data['session_token'];
-    $answer_to = $data['answer_to'] || null; // New field for answer
+    $answer_to = $data['answer_to'] ?? null; // New field for answer
     $created_at = date("Y-m-d H:i:s", null);
+    print_r($user_id);
 
     //Insert the message into the database
     $query = "INSERT INTO messages 

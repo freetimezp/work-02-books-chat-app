@@ -216,6 +216,7 @@
   height: 100%;
   padding: 4px 16px;
   font-size: 18px;
+  color: #1b1a1a;
 
   border-radius: 5px;
   border: solid 1px #c7ccd1;
@@ -298,6 +299,7 @@
   transition: all 0.2s ease-out;
   cursor: pointer;
   overflow: hidden;
+  color: #1b1a1a;
 
   &+input+& {
     border-top: 0 solid #7db0e060;

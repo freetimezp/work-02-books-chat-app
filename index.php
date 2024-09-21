@@ -1039,11 +1039,19 @@ require("functions.php");
 
             <input type="hidden" id="chat-answerTo" name="answer_to" value="" />
 
+            <?php
+            if (isset($_SESSION['chat-login-name'])) {
+               $nameValue = $_SESSION['chat-login-name'];
+            } else {
+               $nameValue = "";
+            }
+            ?>
 
             <div class="chat-name-block">
                <label for="chat-message-user-name">Ваше ім'я:</label>
                <input type="text" name="chat-message-user-name" id="chat-message-user-name"
-                  required placeholder="Як до вас звертатись?">
+                  required placeholder="Як до вас звертатись?"
+                  value="<?php echo ($nameValue); ?>">
             </div>
 
             <label for="chat-topic" id="chat-select-label">Тема (зі списку):</label>
