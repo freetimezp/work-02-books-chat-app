@@ -65,4 +65,59 @@ window.addEventListener("DOMContentLoaded", () => {
             selectSingle.setAttribute('data-state', '');
         });
     }
+
+
+
+    //send form data
+    document.getElementById("chatForm").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent form submission
+
+        const user_id = document.getElementById("chat-hidden_user_id").value || "";
+        const messageTopic = document.querySelector('.__select__title').innerText;
+        //console.log(messageTopic);
+        const messageText = document.getElementById("chat-message").value;
+        const messageToken = "message123"; // Token generation function
+        const sessionToken = "session456"; // Token generation function
+        const answer_to = document.getElementById("chat-answerTo").value || null;
+
+        const data = {
+            user_name: "evgen",
+            user_id: user_id,
+            message_topic: messageTopic,
+            message_text: messageText,
+            message_token: messageToken,
+            session_token: sessionToken,
+            answer_to: answer_to
+        };
+
+        //console.log(data);
+
+        // AJAX Request to submit the form
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "submit_message.php", true);
+        xhr.setRequestHeader("Content-type", "application/json");
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                console.log(xhr.responseText); // Response from server
+                //alert("Message sent successfully!");
+
+                //clear form
+                //document.getElementById("message").value = '';
+            }
+        };
+
+        xhr.send(JSON.stringify(data));
+    });
+
+
+
+
+
+
+
+
+
+
+
 });

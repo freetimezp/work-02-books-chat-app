@@ -1032,7 +1032,7 @@ require("functions.php");
             </div>
          </div>
 
-         <form id="chatForm">
+         <form id="chatForm" method="POST">
             <input type="hidden" id="chat-hidden_user_id" name="hidden_user_id"
                value="<?= isset($_SESSION['user_id']) ? $_SESSION['user_id'] : ''; ?>" />
             <input type="hidden" id="chat-token" name="token" value="">
@@ -1040,32 +1040,39 @@ require("functions.php");
             <input type="hidden" id="chat-answerTo" name="answer_to" value="" />
 
 
+            <div class="chat-name-block">
+               <label for="chat-message-user-name">Ваше ім'я:</label>
+               <input type="text" name="chat-message-user-name" id="chat-message-user-name"
+                  required placeholder="Як до вас звертатись?">
+            </div>
 
             <label for="chat-topic" id="chat-select-label">Тема (зі списку):</label>
             <div class="__select" data-state="" id="chat-topic">
                <div class="__select__title" data-default="Option 0">Topic 1</div>
                <div class="__select__content">
-                  <input id="singleSelect0" class="__select__input" type="radio" name="singleSelect" />
-                  <label for="singleSelect0" class="__select__label">Topic 0</label>
-                  <input id="singleSelect1" class="__select__input" type="radio" name="singleSelect" />
-                  <label for="singleSelect1" class="__select__label">Topic 1</label>
-                  <input id="singleSelect2" class="__select__input" type="radio" name="singleSelect" />
-                  <label for="singleSelect2" class="__select__label">Topic 2</label>
-                  <input id="singleSelect3" class="__select__input" type="radio" name="singleSelect" />
-                  <label for="singleSelect3" class="__select__label">Topic 3</label>
-                  <input id="singleSelect4" class="__select__input" type="radio" name="singleSelect" />
-                  <label for="singleSelect4" class="__select__label">Topic 4</label>
+                  <input id="singleTopic0" class="__select__input" type="radio" name="singleTopic" />
+                  <label for="singleTopic0" class="__select__label">Topic 0</label>
+                  <input id="singleTopic1" class="__select__input" type="radio" name="singleTopic" />
+                  <label for="singleTopic1" class="__select__label">Topic 1</label>
+                  <input id="singleTopic2" class="__select__input" type="radio" name="singleTopic" />
+                  <label for="singleTopic2" class="__select__label">Topic 2</label>
+                  <input id="singleTopic3" class="__select__input" type="radio" name="singleTopic" />
+                  <label for="singleTopic3" class="__select__label">Topic 3</label>
+                  <input id="singleTopic4" class="__select__input" type="radio" name="singleTopic" />
+                  <label for="singleTopic4" class="__select__label">Topic 4</label>
                </div>
             </div>
 
-            <textarea id="message" name="message" rows="4" cols="50" placeholder="Наберіть текст повідомлення"
-               required></textarea>
+            <textarea id="chat-message" name="chat-message" rows="4" cols="50"
+               placeholder="Наберіть текст повідомлення" required></textarea>
 
             <div class="chat-btn-block">
-               <div class="chat-btn chat-form-close-btn" id="close-chat-btn">
+               <button class="chat-btn chat-form-close-btn" id="close-chat-btn">
                   Закрити
-               </div>
-               <button class="chat-btn" type="submit" <?= !isset($_SESSION['user_email']) && 'disabled'; ?>>Відправити</button>
+               </button>
+               <button class="chat-btn" type="submit">
+                  Відправити
+               </button>
             </div>
          </form>
       </div>

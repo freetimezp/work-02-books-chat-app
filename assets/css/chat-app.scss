@@ -140,6 +140,36 @@
   font-size: 18px;
 }
 
+.chat-name-block {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.chat-name-block label {
+  background: linear-gradient(-90deg, #778fbc, #0f1fb7);
+  color: transparent;
+  background-clip: text;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.chat-name-block input {
+  background-color: transparent;
+  padding: 10px;
+  border: 1px solid #b4d2ef;
+  outline: none;
+  color: rgb(12, 37, 62);
+  border-radius: 4px;
+}
+
+.chat-name-block input:hover,
+.chat-name-block input:focus {
+  border: 1px solid #1f4ec5;
+}
+
+
 /** select start **/
 .chat-form-wrapper #chat-select-label {
   background: linear-gradient(-90deg, #778fbc, #0f1fb7);
@@ -364,6 +394,8 @@
 #chatForm .chat-btn.chat-form-close-btn:hover {
   background-color: #979ada;
 }
+
+
 
 
 /* message */
