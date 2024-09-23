@@ -34,118 +34,161 @@ require("functions.php");
 
    <title>Books</title>
 
+   <!--=============== ajax ===============-->
+   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
    <script>
       let currentMessageCount = 0; // Store the current count of messages
-      let activeMessageToken = null; // Variable to store the token of the active message
 
       // Poll for message count every 5 seconds
       setInterval(function() {
-         checkMessageCount();
-
-         reapplyActiveMessage();
-      }, 5000); // Poll every 5 seconds
-      setInterval(function() {
-         $.ajax({
-            url: 'get_new_messages.php',
-            method: 'GET',
-            success: function(response) {
-               // Update message list
-               $('#messageList').html(response);
-
-               // Reapply active message after the update
-               reapplyActiveMessage();
-            }
-         });
+         checkMessageCountAndFetchMessages();
       }, 5000);
 
+      $.ajax({
+         url: 'get_new_messages.php',
+         method: 'POST',
+         contentType: 'application/json',
+         data: JSON.stringify({
+            session_token: $('#chat-session-token-value').val() // Get the value of the hidden input
+         }),
+         success: function(response) {
+            let messages;
+            try {
+               messages = JSON.parse(response); // Parse JSON response
+            } catch (e) {
+               console.error("Error parsing JSON:", e);
+               return;
+            }
 
-      // Function to check the count of messages from the server
-      function checkMessageCount() {
+
+            if (messages.length > 0) {
+               let chatBlockMessages = document.querySelector(".chat-form-content");
+               if (chatBlockMessages) {
+                  chatBlockMessages.classList.add("active");
+               }
+            }
+
+            if (Array.isArray(messages)) {
+               // Build and display messages
+               let htmlContent = '';
+
+               messages.forEach(msg => {
+                  htmlContent +=
+                     `<div class="chat-message-block" data-token="${msg.message_token}">
+                  <div class="chat-message-block__header">
+                     <div class="chat-message-block__header-left">
+                        <div class="chat-message-avatar">${msg.user_name[0]}</div>
+                        <div class="chat-message-name">${msg.user_name}</div>
+                     </div>
+                     <div class="chat-message-block__header-right">
+                        <div class="chat-message-topic">${msg.message_topic}</div>
+                        <div class="chat-message-date">${msg.created_at}</div>
+                     </div>
+                  </div>
+                  <div class="chat-message-block__content">
+                     <p>${msg.message_text}</p>
+                  </div>
+               </div>`;
+               });
+               $('#chat-message-list').html(htmlContent); // Update the DOM with new messages
+            } else {
+               $('#chat-message-list').html(`<p>${messages.message}</p>`); // Handle no messages found
+            }
+         },
+         error: function(xhr, status, error) {
+            console.error("AJAX error:", error);
+         }
+      });
+
+
+
+
+      // Function to check the count of messages from the server and fetch new messages if count changes
+      function checkMessageCountAndFetchMessages() {
          var xhr = new XMLHttpRequest();
          xhr.open("GET", "get_message_count.php", true); // Server endpoint to get the message count
+
          xhr.onreadystatechange = function() {
             if (xhr.readyState == 4 && xhr.status == 200) {
                const newMessageCount = parseInt(xhr.responseText);
+
                if (newMessageCount !== currentMessageCount) { // Only fetch messages if the count changes
                   currentMessageCount = newMessageCount;
 
-                  check = document.getElementById("chat-message-list").classList.contains("check");
-
-                  if (!check) {
-                     document.getElementById("chat-message-list").classList.add("active");
-                  }
-
-                  fetchNewMessages(); // Fetch new messages
+                  fetchNewMessages(); // Fetch new messages if count changed
                }
             }
          };
-         xhr.send();
+
+         xhr.send(); // Send the request to check message count
       }
 
       // Function to fetch new messages from the server
       function fetchNewMessages() {
          var xhr = new XMLHttpRequest();
-         xhr.open("GET", "get_new_messages.php", true); // Server endpoint to get new messages
+         xhr.open("POST", "get_new_messages.php", true); // Server endpoint to get new messages
+
+         // Get the session token from the hidden input
+         var sessionToken = document.getElementById("chat-session-token-value").value;
+
+         // Set the request header for JSON
+         xhr.setRequestHeader("Content-Type", "application/json");
+
+         // Send the session token in the request body
          xhr.onreadystatechange = function() {
             if (xhr.readyState == 4 && xhr.status == 200) {
-               document.getElementById("chat-message-list").innerHTML = xhr.responseText; // Update the messages list
+               let messages;
+               try {
+                  messages = JSON.parse(xhr.responseText); // Parse JSON response
+               } catch (e) {
+                  console.error("Error parsing JSON:", e);
+                  return;
+               }
 
-               // After updating the message list, reapply the 'message-active' class
-               reapplyActiveMessage();
+               if (messages.length > 0) {
+                  let chatBlockMessages = document.querySelector(".chat-form-content");
+                  if (chatBlockMessages) {
+                     chatBlockMessages.classList.add("active");
+                  }
+               }
 
-               scrollToBottom(); // Optional: Scroll to the bottom
+               // Check if the response is an array
+               if (Array.isArray(messages)) {
+                  // Build the HTML dynamically from parsed response
+                  let htmlContent = '';
+
+                  messages.forEach(msg => {
+                     htmlContent +=
+                        `<div class="chat-message-block" data-token="${msg.message_token}">
+                     <div class="chat-message-block__header">
+                        <div class="chat-message-block__header-left">
+                           <div class="chat-message-avatar">${msg.user_name[0]}</div>
+                           <div class="chat-message-name">${msg.user_name}</div>
+                        </div>
+                        <div class="chat-message-block__header-right">
+                           <div class="chat-message-topic">${msg.message_topic}</div>
+                           <div class="chat-message-date">${msg.created_at}</div>
+                        </div>
+                     </div>
+                     <div class="chat-message-block__content">
+                        <p>${msg.message_text}</p>
+                     </div>
+                  </div>`;
+                  });
+
+                  $('#chat-message-list').html(htmlContent); // Update the DOM
+               } else {
+                  $('#chat-message-list').html(`<p>${messages.message}</p>`); // Handle no messages found
+               }
             }
          };
-         xhr.send();
-      }
 
-      // Function to scroll to the bottom of the message list
-      function scrollToBottom() {
-         var messageList = document.getElementById('chat-message-list');
-         messageList.scrollTop = messageList.scrollHeight; // Scroll to the bottom
-      }
-
-
-
-      function replyToMessage(token) {
-         // Remove 'message-active' from all messages
-         document.querySelectorAll('.chat-message-block').forEach(function(messageBlock) {
-            messageBlock.classList.remove('message-active');
+         // Create a payload to send the session token
+         var payload = JSON.stringify({
+            session_token: sessionToken
          });
-
-         // Add 'message-active' class to the clicked message
-         let clickedMessage = document.querySelector(`[data-token='${token}']`);
-         if (clickedMessage) {
-            clickedMessage.classList.add('message-active');
-         }
-
-         // Store the selected message's token
-         activeMessageToken = token;
-
-         // Optionally store in localStorage to persist across page reloads
-         localStorage.setItem('activeMessageToken', token);
-
-         document.getElementById('chat-answerTo').value = token;
-      }
-
-      // Function to reapply 'message-active' class after refresh
-      function reapplyActiveMessage() {
-         const storedToken = localStorage.getItem('activeMessageToken');
-         if (storedToken) {
-            let activeMessage = document.querySelector(`[data-token='${storedToken}']`);
-            if (activeMessage) {
-               activeMessage.classList.add('message-active');
-            }
-         }
-      }
-
-      function clearAnswerToken() {
-         activeMessageToken = null;
-         document.getElementById('chat-answerTo').value = "";
-         localStorage.removeItem('activeMessageToken');
-         document.querySelectorAll('.chat-message-block').forEach(function(messageBlock) {
-            messageBlock.classList.remove('message-active');
-         });
+         xhr.send(payload); // Send the request with the payload
       }
    </script>
 </head>
@@ -1048,9 +1091,12 @@ require("functions.php");
    </a>
 
    <!--========== TOGGLE CHAT BTN ==========-->
-   <div class="chat-icon" id="chat-icon-toggle">
-      <box-icon name='chat'></box-icon>
-   </div>
+   <form class="chat-icon" id="chat-icon-toggle" method="POST">
+      <input type="hidden" id="chat-session-token-value" name="chat-session-token-value" value="test session">
+      <button type="submit">
+         <box-icon name='chat'></box-icon>
+      </button>
+   </form>
 
    <!--========== CHAT FORM ==========-->
    <div class="chat-form-block" id="chat-form-block">
@@ -1201,24 +1247,22 @@ require("functions.php");
             </div>
          </form>
       </div>
+   </div>
 
-      <!--=============== ajax ===============-->
-      <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+   <!--=============== SCROLLREVEAL ===============-->
+   <script src="./assets/js/scrollreveal.min.js"></script>
 
-      <!--=============== SCROLLREVEAL ===============-->
-      <script src="./assets/js/scrollreveal.min.js"></script>
+   <!--=============== SWIPER JS ===============-->
+   <script src="./assets/js/swiper-bundle.min.js"></script>
 
-      <!--=============== SWIPER JS ===============-->
-      <script src="./assets/js/swiper-bundle.min.js"></script>
+   <!--=============== box icons ===============-->
+   <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
 
-      <!--=============== box icons ===============-->
-      <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+   <!--=============== MAIN JS ===============-->
+   <script src="./assets/js/main.js"></script>
 
-      <!--=============== MAIN JS ===============-->
-      <script src="./assets/js/main.js"></script>
-
-      <!--=============== chat app JS ===============-->
-      <script src="./assets/js/chat-app.js"></script>
+   <!--=============== chat app JS ===============-->
+   <script src="./assets/js/chat-app.js"></script>
 </body>
 
 </html>

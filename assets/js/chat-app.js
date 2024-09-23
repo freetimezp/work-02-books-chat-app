@@ -7,11 +7,16 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (toggleChat) {
         toggleChat.addEventListener("click", () => {
+            if (document.getElementById("chat-session-token-value")) {
+                token = getSessionToken();
+                document.getElementById("chat-session-token-value").value = token;
+            }
+
             if (formBlock.classList.contains("active")) {
-                // if (formContent.classList.contains("active")) {
-                //     formContent.classList.remove("active");
-                //     formContent.classList.add("check");
-                // }
+                if (formContent.classList.contains("active")) {
+                    formContent.classList.remove("active");
+                    formContent.classList.add("check");
+                }
                 formBlock.classList.remove("active");
 
                 if (toggleChat.classList.contains("is-clicked")) {
@@ -20,7 +25,8 @@ window.addEventListener("DOMContentLoaded", () => {
                     toggleChat.classList.add("is-clicked");
                 }
             } else {
-                //formContent.classList.remove("check");
+                formContent.classList.remove("check");
+
                 formBlock.classList.add("active");
                 if (toggleChat.classList.contains("is-clicked")) {
                     toggleChat.classList.remove("is-clicked");
@@ -35,9 +41,9 @@ window.addEventListener("DOMContentLoaded", () => {
         closeChat.addEventListener("click", () => {
             formBlock.classList.remove("active");
             toggleChat.classList.remove("is-clicked");
-            // if (formContent.classList.contains("active")) {
-            //     formContent.classList.remove("active");
-            // }
+            if (formContent.classList.contains("active")) {
+                formContent.classList.remove("active");
+            }
         });
     }
 
@@ -67,6 +73,48 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
 
+    // Function to set a session token with expiration time
+    function setSessionToken(token, expirationTime) {
+        const now = new Date().getTime(); // Get current time in milliseconds
+        const item = {
+            value: token,
+            expiry: now + expirationTime
+        };
+        localStorage.setItem("chat-session-token", JSON.stringify(item));
+    }
+
+    // Function to get session token and check if it’s expired
+    function getSessionToken() {
+        const itemStr = localStorage.getItem("chat-session-token");
+
+        // If the item doesn't exist, return null
+        if (!itemStr) {
+            return null;
+        }
+
+        const item = JSON.parse(itemStr);
+
+        document.getElementById("chat-session-token").value = item.value;
+
+        const now = new Date().getTime();
+
+        // Compare the expiry time with the current time
+        if (now > item.expiry) {
+            // If expired, remove token and return null
+            localStorage.removeItem("chat-session-token");
+            return null;
+        }
+        return item.value;
+    }
+
+    // Set the session token if it doesn't exist or has expired
+    const sessionToken = getSessionToken();
+    if (!sessionToken) {
+        const newSessionToken = generateToken(20);
+        setSessionToken(newSessionToken, 259200000); // Set expiration to 3 days 
+    }
+
+
 
     //send form data
     document.getElementById("chatForm").addEventListener("submit", function (event) {
@@ -79,44 +127,7 @@ window.addEventListener("DOMContentLoaded", () => {
         const messageText = document.getElementById("chat-message").value;
         const messageToken = generateToken(30); // Token generation function
 
-
-        // Function to set a session token with expiration time
-        function setSessionToken(token, expirationTime) {
-            const now = new Date().getTime(); // Get current time in milliseconds
-            const item = {
-                value: token,
-                expiry: now + expirationTime
-            };
-            localStorage.setItem("chat-session-token", JSON.stringify(item));
-        }
-
-        // Function to get session token and check if it’s expired
-        function getSessionToken() {
-            const itemStr = localStorage.getItem("chat-session-token");
-
-            // If the item doesn't exist, return null
-            if (!itemStr) {
-                return null;
-            }
-
-            const item = JSON.parse(itemStr);
-            const now = new Date().getTime();
-
-            // Compare the expiry time with the current time
-            if (now > item.expiry) {
-                // If expired, remove token and return null
-                localStorage.removeItem("chat-session-token");
-                return null;
-            }
-            return item.value;
-        }
-
-        // Set the session token if it doesn't exist or has expired
-        const sessionToken = getSessionToken();
-        if (!sessionToken) {
-            const newSessionToken = generateToken(20);
-            setSessionToken(newSessionToken, 259200000); // Set expiration to 3 days 
-        }
+        const sessionToken = document.getElementById("chat-session-token-value").value;
 
         const answer_to = document.getElementById("chat-answerTo").value || null;
 
@@ -151,6 +162,43 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
 
+    document.getElementById("chat-icon-toggle").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent form submission
+        //console.log(sessionToken);
+
+        const sessionToken = document.getElementById("chat-session-token-value").value;
+
+        const data = {
+            session_token: sessionToken,
+        };
+
+        // AJAX Request to submit the form
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "get_new_messages.php", true);
+        xhr.setRequestHeader("Content-type", "application/json");
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                //console.log('AJAX response:', xhr.responseText); // Log the response to ensure it's correct
+
+                let chatList = document.getElementById("chat-message-list");
+                //console.log('chat-message-list element:', chatList); // Check if the element exists
+
+                // Check the content before updating
+                //console.log('Content before updating:', chatList.innerHTML);
+
+                // Update the message list with response
+                if (chatList) {
+                    chatList.innerHTML = xhr.responseText; // Ensure this is valid HTML from PHP
+                }
+
+                // Check the content after updating
+                //console.log('Content after updating:', chatList.innerHTML);
+            }
+        };
+
+        xhr.send(JSON.stringify(data));
+    });
 
 
     // Generate a simple token for user identification

@@ -20,7 +20,7 @@ if ($data) {
     $session_token = $data['session_token'];
     $answer_to = $data['answer_to'] ?? null; // New field for answer
     $created_at = date("Y-m-d H:i:s", null);
-    print_r($user_id);
+    //print_r($user_id);
 
     //Insert the message into the database
     $query = "INSERT INTO messages 
