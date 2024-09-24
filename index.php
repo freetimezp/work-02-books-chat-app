@@ -45,150 +45,96 @@ require("functions.php");
          checkMessageCountAndFetchMessages();
       }, 5000);
 
-      $.ajax({
-         url: 'get_new_messages.php',
-         method: 'POST',
-         contentType: 'application/json',
-         data: JSON.stringify({
-            session_token: $('#chat-session-token-value').val() // Get the value of the hidden input
-         }),
-         success: function(response) {
-            let messages;
-            try {
-               messages = JSON.parse(response); // Parse JSON response
-            } catch (e) {
-               console.error("Error parsing JSON:", e);
-               return;
-            }
-
-
-            if (messages.length > 0) {
-               let chatBlockMessages = document.querySelector(".chat-form-content");
-               if (chatBlockMessages) {
-                  chatBlockMessages.classList.add("active");
-               }
-            }
-
-            if (Array.isArray(messages)) {
-               // Build and display messages
-               let htmlContent = '';
-
-               messages.forEach(msg => {
-                  htmlContent +=
-                     `<div class="chat-message-block" data-token="${msg.message_token}">
-                  <div class="chat-message-block__header">
-                     <div class="chat-message-block__header-left">
-                        <div class="chat-message-avatar">${msg.user_name[0]}</div>
-                        <div class="chat-message-name">${msg.user_name}</div>
-                     </div>
-                     <div class="chat-message-block__header-right">
-                        <div class="chat-message-topic">${msg.message_topic}</div>
-                        <div class="chat-message-date">${msg.created_at}</div>
-                     </div>
-                  </div>
-                  <div class="chat-message-block__content">
-                     <p>${msg.message_text}</p>
-                  </div>
-               </div>`;
-               });
-               $('#chat-message-list').html(htmlContent); // Update the DOM with new messages
-            } else {
-               $('#chat-message-list').html(`<p>${messages.message}</p>`); // Handle no messages found
-            }
-         },
-         error: function(xhr, status, error) {
-            console.error("AJAX error:", error);
-         }
-      });
-
-
-
-
       // Function to check the count of messages from the server and fetch new messages if count changes
       function checkMessageCountAndFetchMessages() {
-         var xhr = new XMLHttpRequest();
-         xhr.open("GET", "get_message_count.php", true); // Server endpoint to get the message count
+         const sessionToken = $('#chat-session-token-value').val();
+         //console.log(sessionToken);
 
-         xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4 && xhr.status == 200) {
-               const newMessageCount = parseInt(xhr.responseText);
+         $.ajax({
+            url: 'get_message_count.php', // Server endpoint to get the message count
+            method: 'POST',
+            contentType: 'application/json', // Since you're sending JSON, this should stay
+            data: JSON.stringify({
+               session_token: sessionToken
+            }), // Send data as JSON
+            success: function(response) {
+               const newMessageCount = parseInt(response);
+               console.log(newMessageCount);
 
                if (newMessageCount !== currentMessageCount) { // Only fetch messages if the count changes
                   currentMessageCount = newMessageCount;
-
-                  fetchNewMessages(); // Fetch new messages if count changed
+                  fetchNewMessages(sessionToken); // Fetch new messages if count changed
                }
+            },
+            error: function(xhr, status, error) {
+               console.error("Error fetching message count:", error);
             }
-         };
+         });
 
-         xhr.send(); // Send the request to check message count
       }
 
       // Function to fetch new messages from the server
-      function fetchNewMessages() {
-         var xhr = new XMLHttpRequest();
-         xhr.open("POST", "get_new_messages.php", true); // Server endpoint to get new messages
-
+      function fetchNewMessages(token) {
          // Get the session token from the hidden input
-         var sessionToken = document.getElementById("chat-session-token-value").value;
+         $.ajax({
+            url: 'get_new_messages.php',
+            method: 'POST',
+            contentType: 'application/json', // Since you're sending JSON, this should stay
+            data: JSON.stringify({
+               session_token: token
+            }), // Send data as JSON
+            success: function(response) {
+               console.log(response); // Debugging
 
-         // Set the request header for JSON
-         xhr.setRequestHeader("Content-Type", "application/json");
-
-         // Send the session token in the request body
-         xhr.onreadystatechange = function() {
-            if (xhr.readyState == 4 && xhr.status == 200) {
                let messages;
-               try {
-                  messages = JSON.parse(xhr.responseText); // Parse JSON response
-               } catch (e) {
-                  console.error("Error parsing JSON:", e);
-                  return;
-               }
+               messages = response; // Parse JSON response
 
-               if (messages.length > 0) {
+               if (messages && messages.length > 0) {
                   let chatBlockMessages = document.querySelector(".chat-form-content");
                   if (chatBlockMessages) {
                      chatBlockMessages.classList.add("active");
                   }
                }
 
-               // Check if the response is an array
-               if (Array.isArray(messages)) {
-                  // Build the HTML dynamically from parsed response
+               if (messages && Array.isArray(messages)) {
                   let htmlContent = '';
-
-                  messages.forEach(msg => {
-                     htmlContent +=
-                        `<div class="chat-message-block" data-token="${msg.message_token}">
-                     <div class="chat-message-block__header">
-                        <div class="chat-message-block__header-left">
-                           <div class="chat-message-avatar">${msg.user_name[0]}</div>
-                           <div class="chat-message-name">${msg.user_name}</div>
-                        </div>
-                        <div class="chat-message-block__header-right">
-                           <div class="chat-message-topic">${msg.message_topic}</div>
-                           <div class="chat-message-date">${msg.created_at}</div>
-                        </div>
-                     </div>
-                     <div class="chat-message-block__content">
-                        <p>${msg.message_text}</p>
-                     </div>
-                  </div>`;
+                  messages?.forEach(msg => {
+                     htmlContent += `
+                        <div class="chat-message-block" data-token="${msg.message_token}">
+                           <div class="chat-message-block__header">
+                              <div class="chat-message-block__header-left">
+                                 <div class="chat-message-avatar">${msg.user_name[0]}</div>
+                                 <div class="chat-message-name">${msg.user_name}</div>
+                              </div>
+                              <div class="chat-message-block__header-right">
+                                 <div class="chat-message-topic">${msg.message_topic}</div>
+                                 <div class="chat-message-date">${msg.created_at}</div>
+                              </div>
+                           </div>
+                           <div class="chat-message-block__content">
+                              <p>${msg.message_text}</p>
+                           </div>
+                        </div>`
                   });
-
-                  $('#chat-message-list').html(htmlContent); // Update the DOM
+                  $('#chat-message-list').html(htmlContent);
                } else {
-                  $('#chat-message-list').html(`<p>${messages.message}</p>`); // Handle no messages found
+                  $('#chat-message-list').html(`<p>Session token not provided</p>`);
                }
-            }
-         };
 
-         // Create a payload to send the session token
-         var payload = JSON.stringify({
-            session_token: sessionToken
+               scrollToBottom(); // Optional: Scroll to the bottom
+            },
+            error: function(xhr, status, error) {
+               console.error("AJAX error:", error);
+            }
          });
-         xhr.send(payload); // Send the request with the payload
+      }
+
+      // Function to scroll to the bottom of the message list
+      function scrollToBottom() {
+         var messageList = document.getElementById('chat-message-list');
+         if (messageList) {
+            messageList.scrollTop = messageList.scrollHeight; // Scroll to the bottom
+         }
       }
    </script>
 </head>
@@ -1092,7 +1038,7 @@ require("functions.php");
 
    <!--========== TOGGLE CHAT BTN ==========-->
    <form class="chat-icon" id="chat-icon-toggle" method="POST">
-      <input type="hidden" id="chat-session-token-value" name="chat-session-token-value" value="test session">
+      <input type="hidden" id="chat-session-token-value" name="chat-session-token-value" value="">
       <button type="submit">
          <box-icon name='chat'></box-icon>
       </button>
@@ -1101,97 +1047,7 @@ require("functions.php");
    <!--========== CHAT FORM ==========-->
    <div class="chat-form-block" id="chat-form-block">
       <div class="chat-form-wrapper">
-         <div class="chat-form-content" id="chat-message-list">
-            <!-- <div class="chat-message-block">
-               <div class="chat-message-block__header">
-                  <div class="chat-message-block__header-left">
-                     <div class="chat-message-avatar">
-                        П
-                     </div>
-                     <div class="chat-message-name">
-                        Петро
-                     </div>
-                  </div>
-                  <div class="chat-message-block__header-right">
-                     <div class="chat-message-topic">
-                        Topic 1
-                     </div>
-                     <div class="chat-message-date">
-                        12.09.2024 17:23:00
-                     </div>
-                  </div>
-               </div>
-
-               <div class="chat-message-block__content">
-                  <p>
-                     Lorem ipsum dolor sit amet consectetur, adipisicing elit. Velit
-                     aut sit fugiat voluptatum, praesentium dolores ratione nam,
-                     doloremque fugit autem fuga aliquam saepe, nihil sequi atque id
-                     nulla. In explicabo itaque numquam!
-                  </p>
-               </div>
-            </div>
-
-            <div class="chat-message-block chat-message-manager">
-               <div class="chat-message-block__header">
-                  <div class="chat-message-block__header-left">
-                     <div class="chat-message-avatar">
-                        M
-                     </div>
-                     <div class="chat-message-name">
-                        Manager 1
-                     </div>
-                  </div>
-                  <div class="chat-message-block__header-right">
-                     <div class="chat-message-topic">
-                        Topic 1
-                     </div>
-                     <div class="chat-message-date">
-                        12.09.2024 17:24:00
-                     </div>
-                  </div>
-               </div>
-
-               <div class="chat-message-block__content">
-                  <p>
-                     Lorem ipsum dolor sit amet consectetur, adipisicing elit. Velit
-                     aut sit fugiat voluptatum, praesentium dolores ratione nam,
-                     doloremque fugit autem fuga aliquam saepe, nihil sequi atque id
-                     nulla. In explicabo itaque numquam!
-                  </p>
-               </div>
-            </div>
-
-            <div class="chat-message-block chat-message-admin">
-               <div class="chat-message-block__header">
-                  <div class="chat-message-block__header-left">
-                     <div class="chat-message-avatar">
-                        A
-                     </div>
-                     <div class="chat-message-name">
-                        Admin
-                     </div>
-                  </div>
-                  <div class="chat-message-block__header-right">
-                     <div class="chat-message-topic">
-                        Topic 1
-                     </div>
-                     <div class="chat-message-date">
-                        12.09.2024 17:27:00
-                     </div>
-                  </div>
-               </div>
-
-               <div class="chat-message-block__content">
-                  <p>
-                     Lorem ipsum dolor sit amet consectetur, adipisicing elit. Velit
-                     aut sit fugiat voluptatum, praesentium dolores ratione nam,
-                     doloremque fugit autem fuga aliquam saepe, nihil sequi atque id
-                     nulla. In explicabo itaque numquam!
-                  </p>
-               </div>
-            </div> -->
-         </div>
+         <div class="chat-form-content" id="chat-message-list"></div>
 
          <form id="chatForm" method="POST">
             <input type="hidden" id="chat-hidden_user_id" name="hidden_user_id"

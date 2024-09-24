@@ -1,13 +1,22 @@
 <?php
-require_once 'connect.php';
+require_once 'connectDB.php';
 
-//$userId = $_SESSION['user_id'];
+// Decode the JSON payload
+$data = json_decode(file_get_contents("php://input"), true);
 
-$query = "SELECT COUNT(*) AS message_count FROM messages";
-$stmt = $conn->prepare($query);
-// $stmt->bind_param("s", $userId);
-$stmt->execute();
-$result = $stmt->get_result();
-$row = $result->fetch_assoc();
+$sessionToken = isset($data['session_token']) ? $data['session_token'] : null;
 
-echo $row['message_count']; // Return the count of messages
+if ($sessionToken) {
+    $query = "SELECT COUNT(*) AS message_count FROM messages WHERE session_token = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $sessionToken);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+
+    header('Content-Type: application/json');
+    echo json_encode($row['message_count']);
+} else {
+    header('Content-Type: application/json');
+    echo json_encode(['message' => 'Session token not provided! Try count messages']);
+}

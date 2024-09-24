@@ -1,6 +1,4 @@
 <?php
-ob_start(); // Start output buffering
-
 
 require_once 'connectDB.php';
 session_start();
@@ -8,66 +6,41 @@ session_start();
 // Decode the JSON payload
 $data = json_decode(file_get_contents("php://input"), true);
 
+// Check if the session token is set in the POST request
+$sessionToken = isset($data['session_token']) ? $data['session_token'] : null;
+
 //check role
-$role = isset($_SESSION['role']) ? $_SESSION['role'] : "";
+$role = isset($_SESSION['role']) ? $_SESSION['role'] : null;
 
-// Get the current user's ID from the session
-$userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+if ($sessionToken) {
+    // Handle the logic to fetch new messages based on the session token
 
-if (!empty($_GET['debug'])) {
-    echo json_encode(["user_id" => $userId]); // Only for debugging
-    exit; // Exit after debug response
-}
+    if ($role === "admin") {
+        $query = "SELECT * FROM messages ORDER BY created_at ASC";
+    } else if ($role === "manager") {
+        $query = "SELECT * FROM messages ORDER BY created_at ASC";
+    } else {
+        $query = "SELECT * FROM messages WHERE session_token = ? ORDER BY created_at ASC";
+    }
 
-// Check if 'session_token' is set and not null
-$chatSessionToken = isset($data['session_token']) ? $data['session_token'] : null;
+    $stmt = $conn->prepare($query);
 
-if ($role !== 'admin' && $role !== 'manager' && !$chatSessionToken) {
-    echo json_encode(["message" => "No session token provided."]);
-    exit;
-}
+    if ($role !== "manager" && $role !== "admin") {
+        $stmt->bind_param("s", $sessionToken);
+    }
 
-//error_log("Chat session token: " . $chatSessionToken); // Log the token to check its value
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-// Prepare the SQL query based on the role
-if ($role === 'admin') {
-    // Admin can see all messages
-    $query = "SELECT * FROM messages";
-} elseif ($role === 'manager') {
-    // Manager sees messages related to topics they manage
-    $query = "SELECT m.* FROM messages m 
-              JOIN topics t ON m.message_topic = t.title 
-              WHERE t.manager_id = ?"; // Filter by manager_id
-} else {
-    // Regular users see messages for their session token
-    $query = "SELECT * FROM messages WHERE session_token = ?";
-}
+    // Output the messages in a format your frontend can handle
+    $messages = [];
+    while ($row = $result->fetch_assoc()) {
+        $messages[] = $row;
+    }
 
-$stmt = $conn->prepare($query);
-
-if ($role === 'manager') {
-    // Bind the user_id for the manager
-    $stmt->bind_param("s", $userId);
-} elseif ($role !== 'admin') {
-    $stmt->bind_param("s", $chatSessionToken);
-}
-
-$stmt->execute();
-$result = $stmt->get_result();
-
-$messages = [];
-
-// Collect all messages
-while ($row = $result->fetch_assoc()) {
-    $messages[] = $row;
-}
-
-// Return the messages if found, otherwise return a "No messages found" response
-if (count($messages) > 0) {
+    header('Content-Type: application/json');
     echo json_encode($messages);
 } else {
-    echo json_encode(["message" => "No messages found."]);
+    header('Content-Type: application/json');
+    echo json_encode(['message' => 'Session token not provided!']);
 }
-
-
-ob_end_flush(); // Send the output
