@@ -28,6 +28,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 formContent.classList.remove("check");
 
                 formBlock.classList.add("active");
+
                 if (toggleChat.classList.contains("is-clicked")) {
                     toggleChat.classList.remove("is-clicked");
                 } else {
@@ -181,4 +182,9 @@ window.addEventListener("DOMContentLoaded", () => {
         }
         return result;
     }
+
+
 });
+
+
+

@@ -38,104 +38,107 @@ require("functions.php");
    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
    <script>
-      let currentMessageCount = 0; // Store the current count of messages
+      window.addEventListener("DOMContentLoaded", () => {
+         let currentMessageCount = 0; // Store the current count of messages
 
-      // Poll for message count every 5 seconds
-      setInterval(function() {
-         checkMessageCountAndFetchMessages();
-      }, 5000);
+         setInterval(function() {
+            // Poll for message count every 5 seconds
+            checkMessageCountAndFetchMessages();
 
-      // Function to check the count of messages from the server and fetch new messages if count changes
-      function checkMessageCountAndFetchMessages() {
-         const sessionToken = $('#chat-session-token-value').val();
-         //console.log(sessionToken);
+         }, 5000);
 
-         $.ajax({
-            url: 'get_message_count.php', // Server endpoint to get the message count
-            method: 'POST',
-            contentType: 'application/json', // Since you're sending JSON, this should stay
-            data: JSON.stringify({
-               session_token: sessionToken
-            }), // Send data as JSON
-            success: function(response) {
-               const newMessageCount = parseInt(response);
-               console.log(newMessageCount);
 
-               if (newMessageCount !== currentMessageCount) { // Only fetch messages if the count changes
-                  currentMessageCount = newMessageCount;
-                  fetchNewMessages(sessionToken); // Fetch new messages if count changed
-               }
-            },
-            error: function(xhr, status, error) {
-               console.error("Error fetching message count:", error);
-            }
-         });
+         // Function to check the count of messages from the server and fetch new messages if count changes
+         function checkMessageCountAndFetchMessages() {
+            const sessionToken = $('#chat-session-token-value').val();
+            //console.log(sessionToken);
 
-      }
+            $.ajax({
+               url: 'get_message_count.php', // Server endpoint to get the message count
+               method: 'POST',
+               contentType: 'application/json', // Since you're sending JSON, this should stay
+               data: JSON.stringify({
+                  session_token: sessionToken
+               }), // Send data as JSON
+               success: function(response) {
+                  const newMessageCount = parseInt(response);
 
-      // Function to fetch new messages from the server
-      function fetchNewMessages(token) {
-         // Get the session token from the hidden input
-         $.ajax({
-            url: 'get_new_messages.php',
-            method: 'POST',
-            contentType: 'application/json', // Since you're sending JSON, this should stay
-            data: JSON.stringify({
-               session_token: token
-            }), // Send data as JSON
-            success: function(response) {
-               console.log(response); // Debugging
-
-               let messages;
-               messages = response; // Parse JSON response
-
-               if (messages && messages.length > 0) {
-                  let chatBlockMessages = document.querySelector(".chat-form-content");
-                  if (chatBlockMessages) {
-                     chatBlockMessages.classList.add("active");
+                  if (newMessageCount !== currentMessageCount) { // Only fetch messages if the count changes
+                     currentMessageCount = newMessageCount;
+                     fetchNewMessages(sessionToken); // Fetch new messages if count changed
                   }
+               },
+               error: function(xhr, status, error) {
+                  console.error("Error fetching message count:", error);
                }
+            });
 
-               if (messages && Array.isArray(messages)) {
-                  let htmlContent = '';
-                  messages?.forEach(msg => {
-                     htmlContent += `
-                        <div class="chat-message-block" data-token="${msg.message_token}">
-                           <div class="chat-message-block__header">
-                              <div class="chat-message-block__header-left">
-                                 <div class="chat-message-avatar">${msg.user_name[0]}</div>
-                                 <div class="chat-message-name">${msg.user_name}</div>
-                              </div>
-                              <div class="chat-message-block__header-right">
-                                 <div class="chat-message-topic">${msg.message_topic}</div>
-                                 <div class="chat-message-date">${msg.created_at}</div>
-                              </div>
-                           </div>
-                           <div class="chat-message-block__content">
-                              <p>${msg.message_text}</p>
-                           </div>
-                        </div>`
-                  });
-                  $('#chat-message-list').html(htmlContent);
-               } else {
-                  $('#chat-message-list').html(`<p>Session token not provided</p>`);
-               }
-
-               scrollToBottom(); // Optional: Scroll to the bottom
-            },
-            error: function(xhr, status, error) {
-               console.error("AJAX error:", error);
-            }
-         });
-      }
-
-      // Function to scroll to the bottom of the message list
-      function scrollToBottom() {
-         var messageList = document.getElementById('chat-message-list');
-         if (messageList) {
-            messageList.scrollTop = messageList.scrollHeight; // Scroll to the bottom
          }
-      }
+
+         // Function to fetch new messages from the server
+         function fetchNewMessages(token) {
+            // Get the session token from the hidden input
+            $.ajax({
+               url: 'get_new_messages.php',
+               method: 'POST',
+               contentType: 'application/json', // Since you're sending JSON, this should stay
+               data: JSON.stringify({
+                  session_token: token
+               }), // Send data as JSON
+               success: function(response) {
+                  console.log(response); // Debugging
+
+                  let messages;
+                  messages = response; // Parse JSON response
+
+                  if (messages && messages.length > 0) {
+                     let chatBlockMessages = document.querySelector(".chat-form-content");
+                     if (chatBlockMessages) {
+                        chatBlockMessages.classList.add("active");
+                     }
+                  }
+
+                  if (messages && Array.isArray(messages)) {
+                     let htmlContent = '';
+                     messages?.forEach(msg => {
+                        htmlContent += `
+                    <div class="chat-message-block" data-token="${msg.message_token}">
+                       <div class="chat-message-block__header">
+                          <div class="chat-message-block__header-left">
+                             <div class="chat-message-avatar">${msg.user_name[0]}</div>
+                             <div class="chat-message-name">${msg.user_name}</div>
+                          </div>
+                          <div class="chat-message-block__header-right">
+                             <div class="chat-message-topic">${msg.message_topic}</div>
+                             <div class="chat-message-date">${msg.created_at}</div>
+                          </div>
+                       </div>
+                       <div class="chat-message-block__content">
+                          <p>${msg.message_text}</p>
+                       </div>
+                    </div>`
+                     });
+                     $('#chat-message-list').html(htmlContent);
+                  } else {
+                     $('#chat-message-list').html(`<p>Session token not provided</p>`);
+                  }
+
+                  scrollToBottom(); // Optional: Scroll to the bottom
+               },
+               error: function(xhr, status, error) {
+                  console.error("AJAX error:", error);
+               }
+            });
+         }
+
+         // Function to scroll to the bottom of the message list
+         function scrollToBottom() {
+            var messageList = document.getElementById('chat-message-list');
+            if (messageList) {
+               messageList.scrollTop = messageList.scrollHeight; // Scroll to the bottom
+            }
+         }
+      });
    </script>
 </head>
 
