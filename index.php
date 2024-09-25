@@ -2,6 +2,7 @@
 session_start(); // starts the session
 //save main page in session
 $_SESSION['url'] = $_SERVER['REQUEST_URI'];
+//print_r($_SESSION);
 
 //connect to database SQL
 require("connectDB.php");
@@ -39,57 +40,55 @@ require("functions.php");
 
    <script>
       window.addEventListener("DOMContentLoaded", () => {
-         let currentMessageCount = 0; // Store the current count of messages
+         let currentMessageCount = 0; // Store the current count of messages         
 
-         setInterval(function() {
-            // Poll for message count every 5 seconds
-            checkMessageCountAndFetchMessages();
-
-         }, 5000);
-
+         // Set an interval to check for new messages every 5 seconds
+         setInterval(checkMessageCountAndFetchMessages, 5000);
 
          // Function to check the count of messages from the server and fetch new messages if count changes
          function checkMessageCountAndFetchMessages() {
             const sessionToken = $('#chat-session-token-value').val();
             //console.log(sessionToken);
+            const role = '<?= isset($_SESSION['`role']) ? $_SESSION['role'] : null ?>';
 
+            // Send request to get the message count based on session token and role
             $.ajax({
                url: 'get_message_count.php', // Server endpoint to get the message count
                method: 'POST',
                contentType: 'application/json', // Since you're sending JSON, this should stay
                data: JSON.stringify({
-                  session_token: sessionToken
+                  session_token: sessionToken,
+                  role: role // Send the role information as well
                }), // Send data as JSON
                success: function(response) {
                   const newMessageCount = parseInt(response);
 
                   if (newMessageCount !== currentMessageCount) { // Only fetch messages if the count changes
                      currentMessageCount = newMessageCount;
-                     fetchNewMessages(sessionToken); // Fetch new messages if count changed
+                     fetchNewMessages(sessionToken, role); // Fetch new messages if count changed
                   }
                },
                error: function(xhr, status, error) {
                   console.error("Error fetching message count:", error);
                }
             });
-
          }
 
          // Function to fetch new messages from the server
-         function fetchNewMessages(token) {
+         function fetchNewMessages(token, role) {
             // Get the session token from the hidden input
             $.ajax({
                url: 'get_new_messages.php',
                method: 'POST',
                contentType: 'application/json', // Since you're sending JSON, this should stay
                data: JSON.stringify({
-                  session_token: token
+                  session_token: token,
+                  role: role
                }), // Send data as JSON
                success: function(response) {
                   console.log(response); // Debugging
 
-                  let messages;
-                  messages = response; // Parse JSON response
+                  let messages = response; // Parse JSON response
 
                   if (messages && messages.length > 0) {
                      let chatBlockMessages = document.querySelector(".chat-form-content");
@@ -98,11 +97,22 @@ require("functions.php");
                      }
                   }
 
+                  let htmlContent = '';
+
                   if (messages && Array.isArray(messages)) {
-                     let htmlContent = '';
-                     messages?.forEach(msg => {
+                     messages.forEach(msg => {
+                        let userName = msg.user_name || "Anonymous"; // Fallback to 'Anonymous' if no user_name
+                        // Determine class based on message creator role
+                        let messageClass = '';
+
+                        if (msg.user_role === 'admin') {
+                           messageClass = 'chat-message-admin';
+                        } else if (msg.user_role === 'manager') {
+                           messageClass = 'chat-message-manager';
+                        }
+
                         htmlContent += `
-                    <div class="chat-message-block" data-token="${msg.message_token}">
+                    <div class="chat-message-block ${messageClass}" data-token="${msg.message_token}">
                        <div class="chat-message-block__header">
                           <div class="chat-message-block__header-left">
                              <div class="chat-message-avatar">${msg.user_name[0]}</div>
@@ -135,7 +145,10 @@ require("functions.php");
          function scrollToBottom() {
             var messageList = document.getElementById('chat-message-list');
             if (messageList) {
-               messageList.scrollTop = messageList.scrollHeight; // Scroll to the bottom
+               messageList.scroll({
+                  top: messageList.scrollHeight,
+                  behavior: 'smooth' // Add smooth scroll
+               });
             }
          }
       });
