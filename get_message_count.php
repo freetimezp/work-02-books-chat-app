@@ -21,8 +21,8 @@ if ($sessionToken) {
     } else {
         // Regular user, only count messages related to their session token
         $query = "SELECT COUNT(*) AS message_count 
-                  FROM messages;
-                --   WHERE session_token = ?";
+                  FROM messages";
+        //   WHERE session_token = ?";
         $stmt = $conn->prepare($query);
         $stmt->bind_param("s", $sessionToken);  // Bind session token for the user
     }

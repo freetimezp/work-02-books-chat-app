@@ -74,6 +74,16 @@ require("functions.php");
          }
       }
 
+      //clear answert_to value for admin and manager
+      function clearAnswerToken() {
+         activeMessageToken = null;
+         document.getElementById('chat-answerTo').value = "";
+         localStorage.removeItem('activeMessageToken');
+         document.querySelectorAll('.chat-message-block').forEach(function(messageBlock) {
+            messageBlock.classList.remove('message-active');
+         });
+      }
+
       window.addEventListener("DOMContentLoaded", () => {
          let currentMessageCount = 0; // Store the current count of messages         
 
@@ -1169,6 +1179,15 @@ require("functions.php");
                   <label for="singleTopic4" class="__select__label">Topic 4</label>
                </div>
             </div>
+
+            <?php if (
+               isset($_SESSION['user_id'])
+               && ($_SESSION['role'] === "manager" || $_SESSION['role'] === "admin")
+            ): ?>
+               <div class="chat-btn clear-answer-btn" onclick="clearAnswerToken()">
+                  Clear Cashe
+               </div>
+            <?php endif; ?>
 
             <textarea id="chat-message" name="chat-message" rows="4" cols="50"
                placeholder="Наберіть текст повідомлення" required></textarea>
