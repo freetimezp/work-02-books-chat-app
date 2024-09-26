@@ -23,25 +23,28 @@ if ($sessionToken) {
                       LEFT JOIN users ON messages.user_id = users.user_id
                       ORDER BY created_at ASC";
             $stmt = $conn->prepare($query);
-        } else if ($role === "manager") {
+        } else if ($role === "manager" && $userId) {
             // Manager sees messages related to their topics or their own messages
             $query = "SELECT messages.*, users.role AS user_role
                       FROM messages 
                       LEFT JOIN topics ON messages.message_topic = topics.title
                       LEFT JOIN users ON messages.user_id = users.user_id
-                      WHERE (topics.manager_id = ? OR messages.user_id = ?)
+                      WHERE topics.manager_id = ? OR messages.user_id = ?
                       ORDER BY messages.created_at ASC";
             $stmt = $conn->prepare($query);
             $stmt->bind_param("ss", $userId, $userId);
         } else {
-            // Regular user sees all messages associated with their session token
+            // Regular user sees all messages associated with their session token or replies to their messages
             $query = "SELECT messages.*, users.role AS user_role
                       FROM messages 
                       LEFT JOIN users ON messages.user_id = users.user_id
                       WHERE session_token = ? 
+                      OR messages.answer_to IN (
+                          SELECT message_token FROM messages WHERE session_token = ?
+                      )
                       ORDER BY created_at ASC";
             $stmt = $conn->prepare($query);
-            $stmt->bind_param("s", $sessionToken);
+            $stmt->bind_param("ss", $sessionToken, $sessionToken);
         }
 
         // Execute the query and fetch results

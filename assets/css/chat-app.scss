@@ -141,8 +141,14 @@
   margin-bottom: 20px;
 }
 
+#chat-message-user-name,
+#chat-message-user-name::placeholder {
+  text-transform: capitalize;
+}
+
 .chat-form-wrapper #chatForm textarea::placeholder {
   font-size: 18px;
+  text-transform: capitalize;
 }
 
 .chat-name-block {
@@ -414,7 +420,7 @@
   border-radius: 20px;
   background-color: #dbe5f8;
   margin-bottom: 40px;
-  border: 2px solid #d3e0f8;
+  border: 3px solid #d3e0f8;
   box-shadow: 0 2px 8px rgba(135, 154, 239);
   cursor: grab;
 }
@@ -499,8 +505,8 @@
   text-transform: uppercase;
 }
 
-.chat-message-active {
-  border: 2px solid #5d82e5;
+.message-active {
+  border: 3px solid #7dbaf3;
 }
 
 .clear-answer-btn {
